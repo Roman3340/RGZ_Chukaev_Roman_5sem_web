@@ -11,6 +11,11 @@ def storage_page():
     return render_template('storage.html')
 
 
+@app.route('/login')
+def login_page():
+    return render_template('login.html')
+
+
 
 # @app.errorhandler(404)
 # def not_found_404(err):

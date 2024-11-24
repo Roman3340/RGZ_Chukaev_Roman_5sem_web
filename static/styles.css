@@ -3,16 +3,11 @@
     padding: 0;
     /* box-sizing: border-box; */
 }
-/* 
+
 @font-face {
-    font-family: Nunito;
-    src: url(../fonts/Nunitoregular.woff);
+    font-family: Stem-Regular, sans-serif;
+    src: url(../fonts/Stem-Regular.ttf);
 }
-@font-face {
-    font-family: Nunito;
-    src: url(../fonts/Nunitobold.woff);
-    font-weight: bold;
-} */
 
 body {
     font-family: Arial, Helvetica, sans-serif, sans-serif;
@@ -311,3 +306,82 @@ body {
 .header-search:hover .header-search-result {
     display: block;
 }
+/* 
+.body-login {
+    height: 100vh;
+}
+
+.body-login main {
+    height: 100vh;
+} */
+
+.main-login {
+    background: rgb(185,110,27);
+    background: linear-gradient(43deg, rgba(185,110,27,1) 4%, rgba(255,181,99,1) 38%, rgba(231,175,112,1) 74%, rgba(255,175,0,1) 100%);
+}
+
+.container-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.block-login-main {
+    display: flex;
+    box-shadow: 4px 4px 49px 0px rgba(34, 60, 80, 0.2);
+    background-color:#fafafa;
+    width: 60%;
+    height: 60%;
+    border-radius: 15px;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.block-login-left-circle {
+    width: 250px;
+    height: 250px;
+    background: #e9e9e9;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.block-login-left-circle svg {
+    width: 60%;
+    height: 60%;
+    
+}
+
+.block-login-right-title {
+    /* font-family: Stem-Regular, sans-serif; */
+}
+
+/* .block-login {
+    box-shadow: 4px 4px 49px 0px rgba(34, 60, 80, 0.2);
+    background-color:#fafafa;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    row-gap: 20px;
+    border-radius: 20px;
+}
+
+.block-login-head {
+    padding: 10px;
+    text-align: left;
+    background: rgb(231,175,112);
+    background: linear-gradient(90deg, rgba(231,175,112,1) 57%, rgba(255,175,0,1) 100%);
+    font-size: 20px;
+}
+
+.block-login-log input {
+    width: 200px;
+    height: 30px;
+}
+
+.block-login-passw input {
+    width: 200px;
+    height: 30px;
+} */
