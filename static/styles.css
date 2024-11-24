@@ -6,7 +6,12 @@
 
 @font-face {
     font-family: Stem-Regular, sans-serif;
-    src: url(../fonts/Stem-Regular.ttf);
+    src: url(/RGZ_Chukaev_Roman_5sem_web/static/fonts/Stem-Regular.ttf);
+}
+
+@font-face {
+    font-family: Stem-Bold, sans-serif;
+    src: url(fonts/Stem-Bold.ttf);
 }
 
 body {
@@ -325,17 +330,27 @@ body {
     align-items: center;
     justify-content: center;
     height: 100vh;
+    text-align: center;
+}
+
+.block-login-main-sides {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 80%;
 }
 
 .block-login-main {
-    display: flex;
     box-shadow: 4px 4px 49px 0px rgba(34, 60, 80, 0.2);
     background-color:#fafafa;
-    width: 60%;
-    height: 60%;
+    width: 65%;
+    height: 80%;
     border-radius: 15px;
-    justify-content: space-around;
-    align-items: center;
+    min-width: 470px;
+}
+
+.block-login-main-title {
+    margin-top: 20px;
 }
 
 .block-login-left-circle {
@@ -355,9 +370,49 @@ body {
 }
 
 .block-login-right-title {
-    /* font-family: Stem-Regular, sans-serif; */
+    font-family: Stem-Bold, sans-serif;
+    font-size: 30px;
+    margin-bottom: 40px;
 }
 
+.block-login-right-log {
+    margin-bottom: 10px;
+}
+
+.block-login-right-pass {
+    margin-bottom: 20px;
+}
+
+.block-login-right-log input,
+.block-login-right-pass input {
+    height: 40px;
+    width: 200px;
+    border-radius: 10px;
+    border: 1px solid #B3B3B3;
+    background-color: #e6e6e6;
+    padding: 10px 10px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+
+.block-login-right-button button {
+    width: 200px;
+    height: 40px;
+    border-radius: 15px;
+    border: 0;
+    background-color: green;
+    color: #fafafa;
+    font-size: 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.block-login-right-forgot a {
+    text-decoration: none;
+    color: #B3B3B3;
+    font-size: 14px;
+}
 /* .block-login {
     box-shadow: 4px 4px 49px 0px rgba(34, 60, 80, 0.2);
     background-color:#fafafa;
