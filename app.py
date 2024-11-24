@@ -6,6 +6,10 @@ app = Flask(__name__)
 def start():
     return 'Начало положено'
 
+@app.route('/storage')
+def storage_page():
+    return render_template('storage.html')
+
 
 
 # @app.errorhandler(404)
