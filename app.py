@@ -15,6 +15,10 @@ def storage_page():
 def login_page():
     return render_template('login.html')
 
+@app.route('/invoices')
+def invoices_page():
+    return render_template('invoices.html')
+
 
 
 # @app.errorhandler(404)

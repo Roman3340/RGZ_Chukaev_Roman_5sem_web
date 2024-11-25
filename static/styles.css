@@ -166,6 +166,10 @@ body {
 
 .container {
     padding: 20px ;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 30px;
 }
 
 .main-title {
@@ -201,6 +205,11 @@ body {
     height: auto;
 }
 
+.block-image.block-image-britva {
+    width: 110px;
+    height: auto;
+}
+
 .block-image img {
     width: 100%;
 }
@@ -217,7 +226,13 @@ body {
     font-size: 15px;
     line-height: 27px;
     color: #858796;
-    margin-bottom: 20px;
+}
+
+.block-quantity {
+    font-size: 15px;
+    line-height: 27px;
+    color: #858796;
+    margin-bottom: 15px;
 }
 
 .block-content {
@@ -238,7 +253,7 @@ body {
 .block-actions-input input {
     height: 30px;
     font-size: 16px;
-    width: 150px;
+    width: 120px;
     border: 2px solid #7c7d83;
     border-radius: 10px;
     text-align: center;
@@ -246,8 +261,14 @@ body {
 }
 
 .block-actions-input input::placeholder {
-    font-size: 16px;
+    font-size: 15px;
     text-align: center;
+}
+
+.block-actions-add {
+    width: 40px;
+    height: 40px;
+    cursor: pointer; 
 }
 
 .block-actions-cart {
@@ -256,6 +277,9 @@ body {
     cursor: pointer;
 }
 
+.block-actions-add svg:hover {
+    fill: #ba6f1a;
+}
 
 .block-actions-cart svg:hover {
     fill: #ba6f1a;
@@ -311,6 +335,177 @@ body {
 .header-search:hover .header-search-result {
     display: block;
 }
+
+.download-more {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 10px;
+}
+
+.download-more button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    color: #ba6f1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.download-more button svg {
+    width: 50px;
+    height: 50px;
+}
+
+.new-item {
+    border-radius: 50%;
+    background: radial-gradient(50% 50% at 50% 50%, #0176FF 0%, #72B3FF 100%);
+    width: 70px;
+    height: 70px;
+    position: fixed;
+    bottom: 45px;
+    right: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 1s infinite;
+}
+
+.new-item button {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: radial-gradient(50% 50% at 50% 50%, #ffa201 0%, #ffb672 100%);
+    border: 0;
+    cursor: pointer;
+}
+
+.new-item::before {
+    content: "";
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    border-radius: 50%;
+    z-index: -1;
+    animation: pulse-2 1s infinite;
+    background: radial-gradient(50% 50% at 50% 50%, #ffa201 0%, #ffb672 100%);
+}
+
+.new-item button svg {
+    width: 40px;
+    height: 40px;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse-2 {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+
+/* .make-invoice {
+    display: none;
+    border-radius: 30px;
+    background: rgb(1, 157, 1);
+    width: 310px;
+    height: 70px;
+    position: fixed;
+    bottom: 45px;
+    right: calc(50% - 280px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+} */
+
+.make-invoice button {
+    width: 310px;
+    height: 70px;
+    background: rgb(1, 157, 1);
+    border-radius: 30px;
+    border: 0;
+    color: #fafafa;
+    font-size: 19px;
+    cursor: pointer;
+    position: fixed;
+    bottom: 45px;
+    /* right: calc(50% - 280px); */
+    left: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+
+.make-invoice button:hover {
+    background: rgb(1, 184, 1); 
+}
+
+.new-item-popup {
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    /* height: 250px; */
+    position: fixed;
+    margin: 0 auto;
+    top: calc(50% - 170px);
+    right: calc(50% - 250px);
+    z-index: 3;
+    /* background-color: #000; */
+    color: #3e3e3e;
+    padding: 30px;
+    align-items: center;
+    row-gap: 10px;
+    border-radius: 30px;
+    background: rgb(251,227,63);
+    background: radial-gradient(circle, rgba(251,227,63,1) 0%, rgba(255,126,33,1) 100%);
+    display: none;
+}
+
+.popup-title {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.new-item-popup input {
+    height: 30px;
+    border-radius: 10px;
+    border: 0;
+    padding: 0 10px;
+    outline: none;
+}
+
+.popup-button {
+    width: 150px;
+    height: 40px;
+    margin-top: 20px;
+    background-color: transparent;
+    border: 2px solid #fff;
+    color: #fff;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+
 /* 
 .body-login {
     height: 100vh;
@@ -408,10 +603,18 @@ body {
     cursor: pointer;
 }
 
+.block-login-right-button button:hover {
+    background-color: rgb(1, 151, 1);
+}
+
 .block-login-right-forgot a {
     text-decoration: none;
     color: #B3B3B3;
     font-size: 14px;
+}
+
+.block-login-right-forgot a:hover {
+    color: #9f9e9e; 
 }
 /* .block-login {
     box-shadow: 4px 4px 49px 0px rgba(34, 60, 80, 0.2);
@@ -440,3 +643,80 @@ body {
     width: 200px;
     height: 30px;
 } */
+
+
+.block-invoices {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    row-gap: 20px;
+    
+}
+
+.block-invoice {
+    background-color: #fcfcfc;
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    border: 2px solid #cfcfcf;
+    border-radius: 10px;
+    font-size: 18px;
+    align-items: center;
+    box-shadow: 6px 9px 14px 0px rgba(34, 60, 80, 0.2);
+}
+
+.block-invoice-status {
+    font-weight: bold;
+}
+
+.block-invoice-status.paid{
+    color: green;
+}
+
+.block-invoice-status.unpaid{
+    color: darkred;
+}
+
+.block-invoice-actions {
+    display: flex;
+    column-gap: 5px;
+    align-items: flex-end;
+}
+
+.block-invoice-actions-waspaid,
+.block-invoice-actions-unpaided {
+    width: 30px;
+    height: 30px;
+}
+
+.block-invoice-actions-waspaid button,
+.block-invoice-actions-unpaided button {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 0;
+    cursor: pointer;
+    background-color: #fcfcfc;
+}
+
+.block-invoice-actions-waspaid button svg,
+.block-invoice-actions-unpaided button svg {
+    width: 34px;
+    height: 33px;
+}
+
+.block-invoice-actions-waspaid.actions-green {
+    fill: green;
+}
+
+.block-invoice-actions-unpaided.actions-red {
+    fill: darkred;
+}
+
+.block-invoice-actions-waspaid button:hover svg {
+    fill: rgb(0, 178, 0);
+}
+
+.block-invoice-actions-unpaided button:hover svg {
+    fill: rgb(183, 3, 3);
+}
