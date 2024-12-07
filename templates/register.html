@@ -20,8 +20,8 @@
                     </div>
                 </div>
                 <div class="block-login-right">
-                    <div class="block-login-right-title">Вход в аккаунт</div>
-                    <form action="/login" method="post">
+                    <div class="block-login-right-title">Регистрация</div>
+                    <form action="/register" method="post">
                         <div class="block-login-right-log">
                             <input type="text" value="{{ login|default('') }}" placeholder="Логин" name="login" class="{% if errors and errors.get('login') %}error{% endif %}">
                             
@@ -29,16 +29,16 @@
                         <div class="block-login-right-pass">
                             <input type="password" placeholder="Пароль" name="password" class="{% if errors and errors.get('password') %}error{% endif %}">
                         </div>
-                        {% if errors and errors.get('notExist') %}
-                            <span class="error-message">{{ errors['notExist'] }}</span>
+                        {% if errors and errors.get('anyExist') %}
+                            <span class="error-message">{{ errors['anyExist'] }}</span>
                         {% endif %}
                         <div class="block-login-right-button">
-                            <button>Войти</button>
+                            <button>Зарегистрироваться</button>
                         </div>
                         <div class="block-login-right-forgot">
-                            <a href="/register">Нет аккаунта? Зарегистрироваться</a>
+                            <a href="/login">Есть аккаунт? Войти</a>
                         </div>
-                    </form> 
+                    </form>
                 </div>
             </div>
         </div>
