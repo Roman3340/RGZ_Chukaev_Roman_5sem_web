@@ -45,17 +45,20 @@ document.addEventListener('click', function (event) {
             return;
         }
 
-        if (quantity > availableQuantity) {
+        const currentQuantity = parseInt(quantityText.textContent, 10) || 0; // Уже добавленное количество
+        const remainingQuantity = availableQuantity - currentQuantity; // Остаток на складе
+
+        if (quantity > remainingQuantity) {
             alert('Недостаточно товара на складе для добавления в накладную.');
             return;
         }
 
         // Добавляем товар в накладную
-        const currentQuantity = parseInt(quantityText.textContent, 10) || 0;
         quantityText.textContent = currentQuantity + quantity;
         quantityCircle.classList.remove('hidden'); // Показать кружочек
     }
 });
+
 
 // Удаление товара из накладной
 document.addEventListener('click', function (event) {
@@ -126,15 +129,74 @@ document.addEventListener('click', function (event) {
 //     });
 // });
 
+// document.addEventListener('click', (event) => {
+//     const deleteButton = event.target.closest('.block-actions-delete');
+//     if (deleteButton) {
+//         const block = deleteButton.closest('.block');
+//         const itemId = block.getAttribute('data-id');
+//         const quantityInput = block.querySelector('input[type="number"]');
+//         const quantity = parseInt(quantityInput?.value || 0);
+
+//         if (isNaN(quantity) || quantity <= 0) {
+//             alert('Укажите корректное количество для удаления.');
+//             return;
+//         }
+
+//         const availableQuantityElement = block.querySelector('.block-quantity');
+//         const availableQuantity = parseInt(availableQuantityElement.getAttribute('data-quantity') || 0);
+
+//         if (quantity > availableQuantity) {
+//             alert('На складе недостаточно товара.');
+//             return;
+//         }
+
+//         // Подтверждение удаления
+//         const confirmation = confirm(`Вы точно хотите удалить товар со склада в количестве: ${quantity} шт.?`);
+//         if (!confirmation) {
+//             return; // Пользователь отменил действие
+//         }
+
+//         // Отправка запроса на сервер
+//         fetch(`/api/items/${itemId}`, {
+//             method: 'PUT',
+//             body: JSON.stringify({ quantity: quantity }),
+//             headers: {
+//                 'Content-Type': 'application/json',
+//             },
+//         })
+//             .then(response => {
+//                 if (!response.ok) {
+//                     return response.json().then(data => {
+//                         throw new Error(data.message || 'Ошибка сервера');
+//                     });
+//                 }
+//                 return response.json();
+//             })
+//             .then(data => {
+//                 availableQuantityElement.innerText = `В наличии: ${data.quantity} шт.`;
+//                 availableQuantityElement.setAttribute('data-quantity', data.quantity);
+
+//                 // if (data.quantity <= 0) {
+//                 //     block.classList.add('hidden-block');
+//                 // }
+//             })
+//             .catch(error => {
+//                 alert(`Ошибка: ${error.message}`);
+//             });
+//     }
+// });
+
+
+// Удаление товара со склада и пересчет накладной
 document.addEventListener('click', (event) => {
     const deleteButton = event.target.closest('.block-actions-delete');
     if (deleteButton) {
         const block = deleteButton.closest('.block');
         const itemId = block.getAttribute('data-id');
         const quantityInput = block.querySelector('input[type="number"]');
-        const quantity = parseInt(quantityInput?.value || 0);
+        const quantityToRemove = parseInt(quantityInput?.value || 0);
 
-        if (isNaN(quantity) || quantity <= 0) {
+        if (isNaN(quantityToRemove) || quantityToRemove <= 0) {
             alert('Укажите корректное количество для удаления.');
             return;
         }
@@ -142,13 +204,13 @@ document.addEventListener('click', (event) => {
         const availableQuantityElement = block.querySelector('.block-quantity');
         const availableQuantity = parseInt(availableQuantityElement.getAttribute('data-quantity') || 0);
 
-        if (quantity > availableQuantity) {
+        if (quantityToRemove > availableQuantity) {
             alert('На складе недостаточно товара.');
             return;
         }
 
         // Подтверждение удаления
-        const confirmation = confirm(`Вы точно хотите удалить товар со склада в количестве: ${quantity} шт.?`);
+        const confirmation = confirm(`Вы точно хотите удалить товар со склада в количестве: ${quantityToRemove} шт.?`);
         if (!confirmation) {
             return; // Пользователь отменил действие
         }
@@ -156,7 +218,7 @@ document.addEventListener('click', (event) => {
         // Отправка запроса на сервер
         fetch(`/api/items/${itemId}`, {
             method: 'PUT',
-            body: JSON.stringify({ quantity: quantity }),
+            body: JSON.stringify({ quantity: quantityToRemove }),
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -170,12 +232,24 @@ document.addEventListener('click', (event) => {
                 return response.json();
             })
             .then(data => {
-                availableQuantityElement.innerText = `В наличии: ${data.quantity} шт.`;
-                availableQuantityElement.setAttribute('data-quantity', data.quantity);
+                const newAvailableQuantity = data.quantity;
+                availableQuantityElement.innerText = `В наличии: ${newAvailableQuantity} шт.`;
+                availableQuantityElement.setAttribute('data-quantity', newAvailableQuantity);
 
-                // if (data.quantity <= 0) {
-                //     block.classList.add('hidden-block');
-                // }
+                // Пересчет накладной
+                const quantityCircle = block.querySelector('.block-quantity-invoice');
+                const quantityText = quantityCircle.querySelector('p');
+                let currentInvoiceQuantity = parseInt(quantityText.textContent, 10) || 0;
+
+                // Уменьшить количество в накладной, если превышает остаток
+                if (currentInvoiceQuantity > newAvailableQuantity) {
+                    currentInvoiceQuantity = newAvailableQuantity;
+                    quantityText.textContent = currentInvoiceQuantity;
+
+                    if (currentInvoiceQuantity === 0) {
+                        quantityCircle.classList.add('hidden'); // Скрыть кружочек, если товаров больше нет
+                    }
+                }
             })
             .catch(error => {
                 alert(`Ошибка: ${error.message}`);
@@ -185,8 +259,7 @@ document.addEventListener('click', (event) => {
 
 
 
-
-
+// 
 
 // // Обработка popup для добавления товаров
 // // Открытие попапа

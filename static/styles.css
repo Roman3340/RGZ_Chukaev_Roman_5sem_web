@@ -30,15 +30,21 @@ body {
 }
 
 .logo {
-    padding: 20px 0;
+    padding: 10px 0 20px 0;
     text-align: center;
     display: block;
+    width: 80px;
+    height: 80px;
+    margin-left: 80px;
 }
 
 .logo img {
-    width: 180px;
-    height: 40px;
+    width: 60px;
+    height: 60px;
 }
+
+.logo svg .st2{fill:#fd919e}.st3{fill:#e8677d};
+.logo svg .st3{fill:#e8677d};
 
 .navigation ul {
     list-style: none;
