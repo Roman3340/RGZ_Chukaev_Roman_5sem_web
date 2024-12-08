@@ -401,20 +401,20 @@ form.addEventListener('submit', (event) => {
     })
         .then(response => response.json())
         .then(data => {
-            // if (data.error) {
-            //     alert('Ошибка: ' + data.message);
-            //     console.error('Ошибка при добавлении товара:', data.message);
-            // } else {
-            alert('Товар добавлен!');
+            if (data.error) {
+                alert('Ошибка: ' + data.message);
+                console.error('Ошибка при добавлении товара:', data.message);
+            } else {
+                alert('Товар добавлен!');
 
                 // Скрыть модальное окно и оверлей
-            modal.classList.remove('visible');
-            overlay.classList.remove('visible');
+                modal.classList.remove('visible');
+                overlay.classList.remove('visible');
 
                 // Перезагрузить список товаров
-            loadItems();
+                loadItems();
             }
-        )
+        })
         .catch(error => console.error('Ошибка при добавлении товара:', error));
 });
 
