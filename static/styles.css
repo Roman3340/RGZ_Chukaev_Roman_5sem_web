@@ -480,7 +480,7 @@ body {
     justify-content: center;
 } */
 
-.make-invoice button {
+/* .make-invoice button {
     width: 310px;
     height: 70px;
     background: rgb(1, 157, 1);
@@ -492,17 +492,48 @@ body {
     position: fixed;
     bottom: 45px;
     /* right: calc(50% - 280px); */
-    left: 300px;
+    /* left: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
     display: none;
 }
+ */
 
+/* .make-invoice button:hover {
+    background: rgb(1, 184, 1); 
+} */
+
+.make-invoice button {
+    width: 270px;
+    height: 60px;
+    background: #52f692;
+    background: linear-gradient(to top, #52f692, #0a9e13);
+    border-radius: 15px;
+    border: 0;
+    color: #fafafa;
+    font-size: 19px;
+    cursor: pointer;
+    position: fixed;
+    bottom: -100px;
+    left: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: bottom 1s ease, opacity 1s ease;
+    z-index: 10;
+}
+
+.make-invoice button.show {
+    bottom: 45px;
+    opacity: 1;
+}
 
 .make-invoice button:hover {
-    background: rgb(1, 184, 1); 
+    background: linear-gradient(to top, #64f59c, #0dc019);
 }
+
 
 .new-item-popup {
     display: flex; /* Остается flex */
