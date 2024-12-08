@@ -254,9 +254,15 @@ def add_item():
         quantity = int(request.form['quantity'])
         image_file = request.files['photo']
 
-        # Построение универсального пути для папки с изображениями
+        # Определение пути к папке с изображениями
         base_dir = os.path.abspath(os.path.dirname(__file__))  # Базовый путь текущего файла
-        images_folder = os.path.join(base_dir, 'static', 'images')
+
+        if 'pythonanywhere' in base_dir:
+            # Путь для хостинга PythonAnywhere
+            images_folder = os.path.join(base_dir, 'RGZ_Chukaev_Roman_5sem_web', 'static', 'images')
+        else:
+            # Путь для локального хостинга Flask
+            images_folder = os.path.join(base_dir, 'static', 'images')
 
         # Создаем папку, если её нет
         if not os.path.exists(images_folder):
@@ -291,6 +297,7 @@ def add_item():
         return jsonify({'error': True, 'message': str(e)})
     finally:
         db_close(conn, cur)
+
 
 
 
