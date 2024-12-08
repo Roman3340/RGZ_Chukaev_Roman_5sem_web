@@ -2,6 +2,7 @@ from flask import Flask, Blueprint, render_template, request, redirect, session,
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
 import sqlite3
 import os
 from os import path
@@ -10,6 +11,8 @@ app = Flask(__name__)
 
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'секретно-секретный секрет')
 app.config['DB_TYPE'] = os.getenv('DB_TYPE', 'postgres')
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static', 'images')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def db_connect():
     if current_app.config['DB_TYPE'] == 'postgres':
@@ -65,6 +68,21 @@ def storage_page():
 
     return render_template('storage.html', login=login, items=items)
 
+# @app.route('/api/items_html', methods=['GET'])
+# def items_html():
+#     conn, cur = db_connect()
+
+#     # Запрашиваем все товары
+#     if current_app.config['DB_TYPE'] == 'postgres':
+#         cur.execute("SELECT * FROM storageItems ORDER BY id ASC;")
+#     else:
+#         cur.execute("SELECT * FROM storageItems ORDER BY id ASC;")
+
+#     items = cur.fetchall()
+#     db_close(conn, cur)
+
+#     # Рендерим только карточки
+#     return render_template('item_fragment.html', items=items)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -152,16 +170,34 @@ def logout():
     session.pop('password', None)  # Удаляем имя из сессии при выходе
     return redirect('/login')
 
-# Получение информации о товарах
-@app.route('/api/items', methods=['GET'])
-def get_items():
+
+
+# # Эндпоинт для получения всех товаров
+# @app.route('/api/items', methods=['GET'])
+# def get_items():
+#     conn, cur = db_connect()
+#     try:
+#         cur.execute("SELECT * FROM storageitems ORDER BY id DESC;")
+#         items = cur.fetchall()
+#         return jsonify(items)  # Возвращаем все товары в формате JSON
+#     except Exception as e:
+#         return jsonify({'error': True, 'message': str(e)})
+#     finally:
+#         db_close(conn, cur)
+
+@app.route('/api/items_html', methods=['GET'])
+def get_items_html():
     conn, cur = db_connect()
     try:
-        cur.execute("SELECT id, nameitem, articoolitem, quantityitem FROM items")
-        items = [dict(row) for row in cur.fetchall()]
-        return jsonify(items)
+        cur.execute("SELECT * FROM storageitems ORDER BY id ASC;")
+        items = cur.fetchall()
+        # Рендерим часть HTML с товарами
+        return render_template('items-fragment.html', items=items)
+    except Exception as e:
+        return jsonify({'error': True, 'message': str(e)})
     finally:
         db_close(conn, cur)
+
 
 # Обновление количества товара
 @app.route('/api/items/<int:item_id>', methods=['PUT'])
@@ -202,6 +238,46 @@ def update_item_quantity(item_id):
     finally:
         db_close(conn, cur)
 
+
+
+# Эндпоинт для добавления товара
+@app.route('/api/items', methods=['POST'])
+def add_item():
+    conn, cur = db_connect()
+    try:
+        name = request.form['name']
+        articool = int(request.form['articol'])
+        quantity = int(request.form['quantity'])
+        image_file = request.files['photo']
+
+        # Сохраняем файл с изображением
+        image_name = path.splitext(image_file.filename)[0]  # Имя файла без расширения
+        image_file.save(f'static/images/{image_name}.png')
+
+        # Проверяем, есть ли товар с таким артикулом
+        cur.execute("SELECT * FROM storageitems WHERE articoolitem = %s", (articool,))
+        existing_item = cur.fetchone()
+
+        if existing_item:
+            # Обновляем количество, если товар уже есть
+            new_quantity = existing_item['quantityitem'] + quantity
+            cur.execute(
+                "UPDATE storageitems SET quantityitem = %s WHERE articoolitem = %s",
+                (new_quantity, articool)
+            )
+        else:
+            # Добавляем новый товар
+            cur.execute(
+                "INSERT INTO storageitems (nameitem, articoolitem, quantityitem, imageitem) VALUES (%s, %s, %s, %s)",
+                (name, articool, quantity, image_name)
+            )
+
+        conn.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': True, 'message': str(e)})
+    finally:
+        db_close(conn, cur)
 
 
 

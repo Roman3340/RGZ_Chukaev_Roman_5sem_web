@@ -499,25 +499,28 @@ body {
 }
 
 .new-item-popup {
-    display: flex;
+    display: flex; /* Остается flex */
     flex-direction: column;
     width: 250px;
-    /* height: 250px; */
     position: fixed;
     margin: 0 auto;
     top: calc(50% - 170px);
-    right: calc(50% - 250px);
+    right: calc(50% - 250px); /* Учитываем ширину */
     z-index: 3;
-    /* background-color: #000; */
     color: #fafafa;
     padding: 30px;
     align-items: center;
     row-gap: 10px;
     border-radius: 30px;
     background-color: #3e3e3e;
-    /* background: rgb(251,227,63); */
-    /* background: radial-gradient(circle, rgba(251,227,63,1) 0%, rgba(255,126,33,1) 100%); */
-    display: none;
+    opacity: 0; /* Прозрачность 0 (скрыто) */
+    visibility: hidden; /* Невидимый элемент */
+    transition: opacity 0.3s ease, visibility 0.3s ease; /* Анимация появления */
+}
+
+.new-item-popup.visible {
+    opacity: 1; /* Полностью видимый */
+    visibility: visible; /* Делает элемент видимым */
 }
 
 .popup-title {
@@ -558,7 +561,7 @@ button.cross-popup {
 }
 
 .overlay {
-    display: none;
+    display: flex;
     position: fixed;
     top: 0;
     left: 0;
@@ -566,7 +569,16 @@ button.cross-popup {
     height: 100%;
     background: rgba(0, 0, 0, 0.5); /* Черный фон с прозрачностью */
     z-index: 2;
+    opacity: 0; /* Прозрачность 0 */
+    visibility: hidden; /* Невидимый */
+    transition: opacity 0.3s ease, visibility 0.3s ease; /* Анимация появления */
 }
+
+.overlay.visible {
+    opacity: 1; /* Полностью видимый */
+    visibility: visible; /* Делает элемент видимым */
+}
+
 
 
 
