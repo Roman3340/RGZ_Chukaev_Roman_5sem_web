@@ -240,20 +240,25 @@ def update_item_quantity(item_id):
 
 
 
-import os
-
 @app.route('/api/items', methods=['POST'])
 def add_item():
     conn, cur = db_connect()
     try:
         name = request.form['name']
-        articool = int(request.form['articol'])
+        articool = request.form.get('articol')  # Получаем артикул как строку
         quantity = int(request.form['quantity'])
         image_file = request.files['photo']
+
+        # Проверяем является ли артикул строкой и преобразуем его в целое число
+        articool = int(articool)
 
         # Построение универсального пути для папки с изображениями
         base_dir = os.path.abspath(os.path.dirname(__file__))  # Базовый путь текущего файла
         images_folder = os.path.join(base_dir, 'static', 'images')
+
+        # Создаем папку, если её нет
+        if not os.path.exists(images_folder):
+            os.makedirs(images_folder)
 
         # Сохранение файла
         image_name = os.path.splitext(image_file.filename)[0]  # Имя файла без расширения
@@ -284,6 +289,7 @@ def add_item():
         return jsonify({'error': True, 'message': str(e)})
     finally:
         db_close(conn, cur)
+
 
 
 
