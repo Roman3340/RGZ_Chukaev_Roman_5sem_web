@@ -250,9 +250,17 @@ def add_item():
         quantity = int(request.form['quantity'])
         image_file = request.files['photo']
 
-        # Сохраняем файл с изображением
-        image_name = path.splitext(image_file.filename)[0]  # Имя файла без расширения
-        image_file.save(f'static/images/{image_name}.png')
+        # Построение пути для сохранения изображения
+        images_folder = os.path.join(os.getcwd(), 'static/images')
+
+        # # Сохраняем файл с изображением
+        # image_name = path.splitext(image_file.filename)[0]  # Имя файла без расширения
+        # image_file.save(f'static/images/{image_name}.png')
+
+        # Сохранение файла
+        image_name = os.path.splitext(image_file.filename)[0]  # Имя без расширения
+        image_path = os.path.join(images_folder, f"{image_name}.png")
+        image_file.save(image_path)
 
         # Проверяем, есть ли товар с таким артикулом
         cur.execute("SELECT * FROM storageitems WHERE articoolitem = %s", (articool,))
