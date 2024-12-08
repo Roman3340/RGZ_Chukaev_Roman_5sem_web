@@ -7,7 +7,7 @@
     <h1 class="main-title">Товары</h1>
         <div class="main-items">
             {% for item in items %}
-            <div class="block {% if loop.index > 24 %}hidden-block{% endif %}">
+            <div class="block {% if loop.index > 24 %}hidden-block{% endif %}"  data-id="{{ item.id }}">
                 {% if item.imageitem == 'kuh_plita' or item.imageitem == 'britva' or item.imageitem == 'wafelnica' %}
                     <div class="block-image block-image-kuh">
                 {% else %}

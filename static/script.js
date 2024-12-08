@@ -93,43 +93,90 @@ document.querySelectorAll('.block-actions-invoice-delete').forEach(deleteButton 
 });
 
 
-// Удалить товар со склада
-document.querySelectorAll('.block-actions-delete').forEach(deleteButton => {
-    deleteButton.addEventListener('click', function () {
-        // Найдем родительский блок товара
-        const block = this.closest('.block');
+// // Удалить товар со склада
+// document.querySelectorAll('.block-actions-delete').forEach(deleteButton => {
+//     deleteButton.addEventListener('click', function () {
+//         // Найдем родительский блок товара
+//         const block = this.closest('.block');
         
-        // Получим текущую информацию о товаре
-        const quantityText = block.querySelector('.block-quantity');
-        const input = block.querySelector('input[type="number"]');
+//         // Получим текущую информацию о товаре
+//         const quantityText = block.querySelector('.block-quantity');
+//         const input = block.querySelector('input[type="number"]');
         
-        // Текущее количество товара на складе
-        let currentStock = parseInt(quantityText.dataset.quantity, 10) || 0;
+//         // Текущее количество товара на складе
+//         let currentStock = parseInt(quantityText.dataset.quantity, 10) || 0;
 
-        // Получим количество для удаления из инпута
-        const quantityToRemove = parseInt(input.value, 10) || 0;
+//         // Получим количество для удаления из инпута
+//         const quantityToRemove = parseInt(input.value, 10) || 0;
 
-        if (quantityToRemove > 0 && quantityToRemove <= currentStock) {
-            // Уменьшаем количество на складе
-            currentStock -= quantityToRemove;
+//         if (quantityToRemove > 0 && quantityToRemove <= currentStock) {
+//             // Уменьшаем количество на складе
+//             currentStock -= quantityToRemove;
 
-            // Обновляем количество товара на складе в тексте
-            quantityText.dataset.quantity = currentStock;
-            quantityText.textContent = `В наличии: ${currentStock} шт.`;
+//             // Обновляем количество товара на складе в тексте
+//             quantityText.dataset.quantity = currentStock;
+//             quantityText.textContent = `В наличии: ${currentStock} шт.`;
 
-            // Очистим поле ввода
-            input.value = '';
+//             // Очистим поле ввода
+//             input.value = '';
 
-            // Если товара не осталось, покажем 0
-            if (currentStock === 0) {
-                quantityText.textContent = 'В наличии: 0 шт.';
-            }
+//             // Если товара не осталось, покажем 0
+//             if (currentStock === 0) {
+//                 quantityText.textContent = 'В наличии: 0 шт.';
+//             }
+//         } else {
+//             // Если введено некорректное количество
+//             alert('Невозможно удалить больше, чем есть на складе.');
+//         }
+//     });
+// });
+
+// Получить все кнопки "Удалить"
+const deleteButtons = document.querySelectorAll('.block-actions-delete');
+
+// Обработчик событий нажатия на кнопку "Удалить"
+deleteButtons.forEach(button => {
+    button.addEventListener('click', function () {
+        const block = this.closest('.block'); // Родительский блок
+        const itemId = block.getAttribute('data-id'); // ID товара
+        const quantityInput = block.querySelector('input[type="number"]'); // Поле ввода количества
+        const quantity = parseInt(quantityInput.value); // Значение количества
+
+        if (quantity && quantity > 0) {
+            fetch(`/api/items/${itemId}`, {
+                method: 'PUT',
+                body: JSON.stringify({ quantity: quantity }),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.message || 'Ошибка сервера');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const quantityElement = block.querySelector('.block-quantity');
+                    quantityElement.innerText = `В наличии: ${data.quantity} шт.`;
+                    quantityElement.setAttribute('data-quantity', data.quantity);
+
+                    if (data.quantity <= 0) {
+                        block.classList.add('hidden-block');
+                    }
+                })
+                .catch(error => {
+                    alert(`Ошибка: ${error.message}`);
+                });
         } else {
-            // Если введено некорректное количество
-            alert('Невозможно удалить больше, чем есть на складе.');
+            alert('Укажите корректное количество для удаления.');
         }
     });
 });
+
+
 
 
 // Обработка popup для добавления товаров

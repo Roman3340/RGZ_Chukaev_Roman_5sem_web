@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint, render_template, request, redirect, session, current_app
+from flask import Flask, Blueprint, render_template, request, redirect, session, current_app, abort, jsonify
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -37,7 +37,9 @@ def db_close(conn, cur):
 
 @app.route("/")
 def start():
-    return 'Начало положено'
+    return redirect('/storage')
+
+    
 
 # @app.route('/storage')
 # def storage_page():
@@ -150,12 +152,76 @@ def logout():
     session.pop('password', None)  # Удаляем имя из сессии при выходе
     return redirect('/login')
 
+# Получение информации о товарах
+@app.route('/api/items', methods=['GET'])
+def get_items():
+    conn, cur = db_connect()
+    try:
+        cur.execute("SELECT id, nameitem, articoolitem, quantityitem FROM items")
+        items = [dict(row) for row in cur.fetchall()]
+        return jsonify(items)
+    finally:
+        db_close(conn, cur)
+
+# Обновление количества товара
+@app.route('/api/items/<int:item_id>', methods=['PUT'])
+def update_item_quantity(item_id):
+    data = request.get_json()
+    if not data or 'quantity' not in data:
+        return jsonify({'error': 'Bad Request', 'message': 'Не указано количество для обновления'}), 400
+
+    quantity_to_remove = data['quantity']
+    if quantity_to_remove <= 0:
+        return jsonify({'error': 'Bad Request', 'message': 'Некорректное количество для обновления'}), 400
+
+    conn, cur = db_connect()
+    try:
+        # Получить текущее количество товара
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("SELECT quantityitem FROM storageitems WHERE id=%s;", (item_id,))
+        else:
+            cur.execute("SELECT quantityitem FROM storageitems WHERE id=?;", (item_id,))
+        
+        item = cur.fetchone()
+        if not item:
+            return jsonify({'error': 'Not Found', 'message': 'Товар не найден'}), 404
+
+        current_quantity = item['quantityitem']
+        if quantity_to_remove > current_quantity:
+            return jsonify({'error': 'Bad Request', 'message': 'На складе недостаточно товаров'}), 400
+
+        # Обновляем количество
+        new_quantity = current_quantity - quantity_to_remove
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("UPDATE storageitems SET quantityitem=%s WHERE id=%s;", (new_quantity, item_id))
+        else:
+            cur.execute("UPDATE storageitems SET quantityitem=? WHERE id=?;", (new_quantity, item_id))
+        
+        conn.commit()
+        return jsonify({'id': item_id, 'quantity': new_quantity})
+    finally:
+        db_close(conn, cur)
+
+
+
+
 @app.route('/invoices')
 def invoices_page():
     login = session.get('login')
     return render_template('invoices.html', login=login)
 
 
+@app.errorhandler(400)
+def bad_request(error):
+    return jsonify({'error': 'Bad Request', 'message': str(error)}), 400
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({'error': 'Not Found', 'message': str(error)}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({'error': 'Internal Server Error', 'message': 'Что-то пошло не так на сервере'}), 500
 
 # @app.errorhandler(404)
 # def not_found_404(err):
