@@ -248,55 +248,77 @@ def add_item():
         name = request.form['name']
         articool = request.form['articol']  # Получаем артикул как строку
 
-        # Проверяем является ли артикул строкой и преобразуем его в целое число
-        articool = int(articool)  # Преобразуем артикул в целое число
+        # Проверяем и преобразуем артикул
+        try:
+            articool = int(articool.strip())  # Убираем лишние пробелы и преобразуем
+        except ValueError:
+            return jsonify({'error': True, 'message': 'Артикул должен быть числом!'})
 
-        quantity = int(request.form['quantity'])
-        image_file = request.files['photo']
+        quantity = request.form['quantity']  # Получаем количество
+        try:
+            quantity = int(quantity.strip())  # Убираем лишние пробелы и преобразуем
+        except ValueError:
+            return jsonify({'error': True, 'message': 'Количество должно быть числом!'})
 
-        # Определение пути к папке с изображениями
-        base_dir = os.path.abspath(os.path.dirname(__file__))  # Базовый путь текущего файла
+        image_file = request.files.get('photo')  # Получаем файл фотографии
 
+        # Определяем путь для сохранения изображений
+        base_dir = os.path.abspath(os.path.dirname(__file__))
         if 'pythonanywhere' in base_dir:
-            # Путь для хостинга PythonAnywhere
             images_folder = os.path.join(base_dir, 'RGZ_Chukaev_Roman_5sem_web', 'static', 'images')
         else:
-            # Путь для локального хостинга Flask
             images_folder = os.path.join(base_dir, 'static', 'images')
 
-        # Создаем папку, если её нет
-        if not os.path.exists(images_folder):
-            os.makedirs(images_folder)
+        os.makedirs(images_folder, exist_ok=True)
 
-        # Сохранение файла
-        image_name = os.path.splitext(image_file.filename)[0]  # Имя файла без расширения
-        image_path = os.path.join(images_folder, f"{image_name}.png")
-        image_file.save(image_path)
+        # Сохраняем изображение, если оно передано
+        image_name = None
+        if image_file and image_file.filename:
+            image_name = os.path.splitext(image_file.filename)[0]
+            image_path = os.path.join(images_folder, f"{image_name}.png")
+            image_file.save(image_path)
 
-        # Проверяем, есть ли товар с таким артикулом
-        cur.execute("SELECT * FROM storageitems WHERE articoolitem = %s", (articool,))
+        # Определяем тип базы данных
+        db_type = current_app.config.get('DB_TYPE', 'sqlite')
+
+        # Проверяем, существует ли товар с таким артикулом
+        if db_type == 'postgres':
+            query_check = "SELECT * FROM storageitems WHERE articoolitem = %s"
+            query_update = "UPDATE storageitems SET quantityitem = %s WHERE articoolitem = %s"
+            query_insert = "INSERT INTO storageitems (nameitem, articoolitem, quantityitem, imageitem) VALUES (%s, %s, %s, %s)"
+            params_check = (articool,)
+            params_update = (quantity, articool)
+            params_insert = (name, articool, quantity, image_name)
+        else:  # SQLite
+            query_check = "SELECT * FROM storageitems WHERE articoolitem = ?"
+            query_update = "UPDATE storageitems SET quantityitem = ? WHERE articoolitem = ?"
+            query_insert = "INSERT INTO storageitems (nameitem, articoolitem, quantityitem, imageitem) VALUES (?, ?, ?, ?)"
+            params_check = (articool,)
+            params_update = (quantity, articool)
+            params_insert = (name, articool, quantity, image_name)
+
+        cur.execute(query_check, params_check)
         existing_item = cur.fetchone()
 
         if existing_item:
-            # Обновляем количество, если товар уже есть
+            # Если товар уже есть, обновляем его количество
             new_quantity = existing_item['quantityitem'] + quantity
-            cur.execute(
-                "UPDATE storageitems SET quantityitem = %s WHERE articoolitem = %s",
-                (new_quantity, articool)
-            )
+            cur.execute(query_update, (new_quantity, articool))
         else:
             # Добавляем новый товар
-            cur.execute(
-                "INSERT INTO storageitems (nameitem, articoolitem, quantityitem, imageitem) VALUES (%s, %s, %s, %s)",
-                (name, articool, quantity, image_name)
-            )
+            cur.execute(query_insert, params_insert)
 
         conn.commit()
         return jsonify({'success': True})
+
     except Exception as e:
+        import traceback
+        traceback.print_exc()  # Вывод полной трассировки для отладки
         return jsonify({'error': True, 'message': str(e)})
+
     finally:
         db_close(conn, cur)
+
 
 
 
