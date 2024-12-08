@@ -240,7 +240,8 @@ def update_item_quantity(item_id):
 
 
 
-# Эндпоинт для добавления товара
+import os
+
 @app.route('/api/items', methods=['POST'])
 def add_item():
     conn, cur = db_connect()
@@ -250,15 +251,12 @@ def add_item():
         quantity = int(request.form['quantity'])
         image_file = request.files['photo']
 
-        # Построение пути для сохранения изображения
-        images_folder = os.path.join(os.getcwd(), 'static/images')
-
-        # # Сохраняем файл с изображением
-        # image_name = path.splitext(image_file.filename)[0]  # Имя файла без расширения
-        # image_file.save(f'static/images/{image_name}.png')
+        # Построение универсального пути для папки с изображениями
+        base_dir = os.path.abspath(os.path.dirname(__file__))  # Базовый путь текущего файла
+        images_folder = os.path.join(base_dir, 'static', 'images')
 
         # Сохранение файла
-        image_name = os.path.splitext(image_file.filename)[0]  # Имя без расширения
+        image_name = os.path.splitext(image_file.filename)[0]  # Имя файла без расширения
         image_path = os.path.join(images_folder, f"{image_name}.png")
         image_file.save(image_path)
 
@@ -286,6 +284,7 @@ def add_item():
         return jsonify({'error': True, 'message': str(e)})
     finally:
         db_close(conn, cur)
+
 
 
 
