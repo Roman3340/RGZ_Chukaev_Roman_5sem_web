@@ -430,11 +430,11 @@ def get_invoice_items(invoice_id):
     conn, cur = db_connect()
     try:
         db_type = current_app.config['DB_TYPE']
-        if db_type == 'sqlite':
-            query = "SELECT * FROM invoiceitems WHERE idinvoice = ?"
+        if db_type == 'postgres':
+            query = "SELECT * FROM invoiceItems WHERE idinvoice = %s"
             cur.execute(query, (invoice_id,))
         else:  # PostgreSQL
-            query = "SELECT * FROM invoiceItems WHERE idinvoice = %s"
+            query = "SELECT * FROM invoiceitems WHERE idinvoice = ?"
             cur.execute(query, (invoice_id,))
 
         items = cur.fetchall()
