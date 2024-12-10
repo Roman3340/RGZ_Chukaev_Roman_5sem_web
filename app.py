@@ -383,7 +383,7 @@ def create_invoice():
             logs.append("Database connection closed.")
 
 
-# Роут для обновления статуса накладной
+# Обновление статуса накладной
 @app.route('/api/invoices/status/<int:invoice_id>', methods=['PUT'])
 def update_invoice_status(invoice_id):
     conn, cur = db_connect()
@@ -393,26 +393,24 @@ def update_invoice_status(invoice_id):
             return jsonify({"error": "Invalid request"}), 400
 
         new_status = data['status']
+        db_type = current_app.config['DB_TYPE']
 
-        if current_app.config['DB_TYPE'] == 'postgres':
+        if db_type == 'postgres':
             query = "UPDATE invoices SET statusInvoice = %s WHERE id = %s RETURNING *"
             cur.execute(query, (new_status, invoice_id))
-            updated_invoice = cur.fetchone()
-        else:
-            if current_app.config['DB_TYPE'] == 'sqlite':
-                query = "UPDATE invoices SET statusinvoice = ? WHERE id = ?"
-                cur.execute(query, (new_status, invoice_id))
-                conn.commit()
-                # После обновления делаем SELECT для получения измененной накладной
-                cur.execute("SELECT * FROM invoices WHERE id = ?", (invoice_id,))
-                updated_invoice = cur.fetchone()
+        else:  # SQLite
+            query = "UPDATE invoices SET statusinvoice = ? WHERE id = ?"
+            cur.execute(query, (new_status, invoice_id))
+            conn.commit()
+            # После обновления выбираем обновленную запись
+            cur.execute("SELECT * FROM invoices WHERE id = ?", (invoice_id,))
 
-        
-        # updated_invoice = cur.fetchone()
+        updated_invoice = cur.fetchone()
 
         if not updated_invoice:
             return jsonify({"error": "Invoice not found"}), 404
 
+        # Преобразование строки в словарь
         invoice = dict(updated_invoice) if isinstance(updated_invoice, sqlite3.Row) else updated_invoice
 
         return jsonify({
@@ -426,15 +424,19 @@ def update_invoice_status(invoice_id):
 
 
 
+
 @app.route('/get-invoice-items/<int:invoice_id>', methods=['GET'])
 def get_invoice_items(invoice_id):
     conn, cur = db_connect()
     try:
-        if current_app.config['DB_TYPE'] == 'sqlite':
+        db_type = current_app.config['DB_TYPE']
+        if db_type == 'sqlite':
             query = "SELECT * FROM invoiceitems WHERE idinvoice = ?"
-        else:
+            cur.execute(query, (invoice_id,))
+        else:  # PostgreSQL
             query = "SELECT * FROM invoiceItems WHERE idinvoice = %s"
-        cur.execute(query, (invoice_id,))
+            cur.execute(query, (invoice_id,))
+
         items = cur.fetchall()
         items_list = [dict(item) for item in items]  # Преобразование в список словарей
 
@@ -443,6 +445,7 @@ def get_invoice_items(invoice_id):
         return jsonify({"error": str(e)}), 500
     finally:
         db_close(conn, cur)
+
 
 
 
