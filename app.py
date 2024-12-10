@@ -423,7 +423,7 @@ def update_invoice_status(invoice_id):
 def get_invoice_items(invoice_id):
     conn, cur = db_connect()
     try:
-        query = "SELECT * FROM invoiceItems WHERE idinvoice = ?" if current_app.config['DB_TYPE'] == 'sqlite' else "SELECT * FROM invoiceItems WHERE idinvoice = %s"
+        query = "SELECT * FROM invoiceitems WHERE idinvoice = ?" if current_app.config['DB_TYPE'] == 'sqlite' else "SELECT * FROM invoiceItems WHERE idinvoice = %s"
         cur.execute(query, (invoice_id,))
         items = cur.fetchall()
         items_list = [dict(item) for item in items]  # Преобразование в список словарей
