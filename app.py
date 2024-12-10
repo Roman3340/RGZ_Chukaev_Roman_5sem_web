@@ -397,6 +397,7 @@ def update_invoice_status(invoice_id):
         if current_app.config['DB_TYPE'] == 'postgres':
             query = "UPDATE invoices SET statusInvoice = %s WHERE id = %s RETURNING *"
             cur.execute(query, (new_status, invoice_id))
+            updated_invoice = cur.fetchone()
         else:
             if current_app.config['DB_TYPE'] == 'sqlite':
                 query = "UPDATE invoices SET statusinvoice = ? WHERE id = ?"
@@ -404,9 +405,10 @@ def update_invoice_status(invoice_id):
                 conn.commit()
                 # После обновления делаем SELECT для получения измененной накладной
                 cur.execute("SELECT * FROM invoices WHERE id = ?", (invoice_id,))
+                updated_invoice = cur.fetchone()
 
         
-        updated_invoice = cur.fetchone()
+        # updated_invoice = cur.fetchone()
 
         if not updated_invoice:
             return jsonify({"error": "Invoice not found"}), 404
