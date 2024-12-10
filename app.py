@@ -398,8 +398,13 @@ def update_invoice_status(invoice_id):
             query = "UPDATE invoices SET statusInvoice = %s WHERE id = %s RETURNING *"
             cur.execute(query, (new_status, invoice_id))
         else:
-            query = "UPDATE invoices SET statusinvoice = ? WHERE id = ?"
-            cur.execute(query, (new_status, invoice_id))
+            if current_app.config['DB_TYPE'] == 'sqlite':
+                query = "UPDATE invoices SET statusinvoice = ? WHERE id = ?"
+                cur.execute(query, (new_status, invoice_id))
+                conn.commit()
+                # После обновления делаем SELECT для получения измененной накладной
+                cur.execute("SELECT * FROM invoices WHERE id = ?", (invoice_id,))
+
         
         updated_invoice = cur.fetchone()
 
@@ -423,7 +428,10 @@ def update_invoice_status(invoice_id):
 def get_invoice_items(invoice_id):
     conn, cur = db_connect()
     try:
-        query = "SELECT * FROM invoiceitems WHERE idinvoice = ?" if current_app.config['DB_TYPE'] == 'sqlite' else "SELECT * FROM invoiceItems WHERE idinvoice = %s"
+        if current_app.config['DB_TYPE'] == 'sqlite':
+            query = "SELECT * FROM invoiceitems WHERE idinvoice = ?"
+        else:
+            query = "SELECT * FROM invoiceItems WHERE idinvoice = %s"
         cur.execute(query, (invoice_id,))
         items = cur.fetchall()
         items_list = [dict(item) for item in items]  # Преобразование в список словарей
