@@ -43,12 +43,7 @@ def db_close(conn, cur):
 def start():
     return redirect('/storage')
 
-    
 
-# @app.route('/storage')
-# def storage_page():
-#     login = session.get('login')
-#     return render_template('storage.html', login=login)
 
 @app.route('/storage')
 def storage_page():
@@ -69,21 +64,6 @@ def storage_page():
 
     return render_template('storage.html', login=login, items=items)
 
-# @app.route('/api/items_html', methods=['GET'])
-# def items_html():
-#     conn, cur = db_connect()
-
-#     # Запрашиваем все товары
-#     if current_app.config['DB_TYPE'] == 'postgres':
-#         cur.execute("SELECT * FROM storageItems ORDER BY id ASC;")
-#     else:
-#         cur.execute("SELECT * FROM storageItems ORDER BY id ASC;")
-
-#     items = cur.fetchall()
-#     db_close(conn, cur)
-
-#     # Рендерим только карточки
-#     return render_template('item_fragment.html', items=items)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -114,19 +94,6 @@ def login_page():
     
     session['login'] = login
     db_close(conn, cur)
-    # conn, cur = db_connect()
-
-    # # Запрашиваем все товары
-    # if current_app.config['DB_TYPE'] == 'postgres':
-    #     cur.execute("SELECT * FROM storageItems ORDER BY id ASC;")
-    # else:
-    #     cur.execute("SELECT * FROM storageItems ORDER BY id ASC;")
-
-    # items = cur.fetchall()
-    # db_close(conn, cur)
-
-    # return render_template('storage.html', login=login, items=items)
-    # return render_template('storage.html', login=login)
     return redirect('/storage')
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -172,19 +139,6 @@ def logout():
     return redirect('/login')
 
 
-
-# # Эндпоинт для получения всех товаров
-# @app.route('/api/items', methods=['GET'])
-# def get_items():
-#     conn, cur = db_connect()
-#     try:
-#         cur.execute("SELECT * FROM storageitems ORDER BY id DESC;")
-#         items = cur.fetchall()
-#         return jsonify(items)  # Возвращаем все товары в формате JSON
-#     except Exception as e:
-#         return jsonify({'error': True, 'message': str(e)})
-#     finally:
-#         db_close(conn, cur)
 
 @app.route('/api/items_html', methods=['GET'])
 def get_items_html():
@@ -324,14 +278,26 @@ def add_item():
 
 
 
+def get_all_invoices():
+    conn, cur = db_connect()
+    try:
+        query = "SELECT id, numberinvoice, statusinvoice FROM invoices"
+        cur.execute(query)
+        invoices = cur.fetchall()  # Сразу возвращает список словарей
+        return invoices
+    except Exception as e:
+        print(f"Error fetching invoices: {e}")
+        return []
+    finally:
+        db_close(conn, cur)
 
 
 
 @app.route('/invoices')
 def invoices_page():
     login = session.get('login')
-    return render_template('invoices.html', login=login)
-
+    invoices = get_all_invoices()  # Загружаем все накладные
+    return render_template('invoices.html', login=login, invoices=invoices)
 
 # Роут для создания накладной
 @app.route('/create-invoice', methods=['POST'])
@@ -417,6 +383,58 @@ def create_invoice():
             logs.append("Database connection closed.")
 
 
+# Роут для обновления статуса накладной
+@app.route('/api/invoices/status/<int:invoice_id>', methods=['PUT'])
+def update_invoice_status(invoice_id):
+    conn, cur = db_connect()
+    try:
+        # Получение нового статуса из запроса
+        data = request.get_json()
+        if not data or 'status' not in data:
+            return jsonify({"error": "Invalid request"}), 400
+
+        new_status = data['status']
+
+        # Обновление статуса накладной
+        if current_app.config['DB_TYPE'] == 'postgres':
+            query = "UPDATE invoices SET statusInvoice = %s WHERE id = %s RETURNING *"
+            cur.execute(query, (new_status, invoice_id))
+        else:
+            query = "UPDATE invoices SET statusinvoice = ? WHERE id = ?"
+            cur.execute(query, (new_status, invoice_id))
+        
+        updated_invoice = cur.fetchone()
+
+        if not updated_invoice:
+            return jsonify({"error": "Invoice not found"}), 404
+
+        # Преобразование результата в JSON-совместимый формат
+        invoice = dict(updated_invoice) if isinstance(updated_invoice, sqlite3.Row) else updated_invoice
+
+        return jsonify({
+            "message": f"Invoice {invoice_id} updated successfully.",
+            "invoice": invoice
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db_close(conn, cur)
+
+
+@app.route('/get-invoice-items/<int:invoice_id>', methods=['GET'])
+def get_invoice_items(invoice_id):
+    conn, cur = db_connect()
+    try:
+        query = "SELECT * FROM invoiceItems WHERE idinvoice = %s" if current_app.config['DB_TYPE'] == 'postgres' else "SELECT * FROM invoiceitems WHERE idinvoice = ?"
+        cur.execute(query, (invoice_id,))
+        items = cur.fetchall()  # PostgreSQL возвращает dict напрямую, SQLite возвращает sqlite3.Row
+        return jsonify(items), 200  # Возвращаем как есть
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db_close(conn, cur)
+
+
 
 
 
@@ -431,51 +449,3 @@ def not_found(error):
 @app.errorhandler(500)
 def internal_error(error):
     return jsonify({'error': 'Internal Server Error', 'message': 'Что-то пошло не так на сервере'}), 500
-
-# @app.errorhandler(404)
-# def not_found_404(err):
-#     return '''
-# <!doctype html>
-# <html>
-#     <head>
-#         <title>НГТУ, ФБ, Лабораторные работы</title>
-#         <link rel="stylesheet" href="''' + url_for('static', filename='styles.css') + '''">
-#     </head>
-#     <body>
-#         <header>
-#             НГТУ, ФБ, WEB-программирование, часть 2. Список лабораторных
-#         </header>
-
-#         <h2>Ошибка 404 - такой страницы не существует</h2>
-
-#         <footer>
-#             &copy; Чукаев Роман, ФБИ-24, 3 курс, 2024
-#         </footer>
-#     </body>
-# </html>
-# '''
-
-
-# @app.errorhandler(500)
-# def not_found_500(err):
-#     return '''
-# <!doctype html>
-# <html>
-#     <head>
-#         <title>НГТУ, ФБ, Лабораторные работы</title>
-#         <link rel="stylesheet" href="''' + url_for('static', filename='styles.css') + '''">
-#     </head>
-#     <body>
-#         <header>
-#             НГТУ, ФБ, WEB-программирование, часть 2. Список лабораторных
-#         </header>
-
-#         <h2>Ошибка 500 - сервер не смог обработать запрос</h2>
-#         <p>Подробности ошибки: ''' + str(err) + '''</p> 
-
-#         <footer>
-#             &copy; Чукаев Роман, ФБИ-24, 3 курс, 2024
-#         </footer>
-#     </body>
-# </html>
-# ''', 500

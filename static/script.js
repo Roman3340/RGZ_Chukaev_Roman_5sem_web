@@ -27,68 +27,6 @@ function togglePopup() {
 
 
 
-// // Показ кружочка с кол-вом товаров в накладной
-// document.addEventListener('click', function (event) {
-//     if (event.target.closest('.block-actions-cart')) {
-//         const cartButton = event.target.closest('.block-actions-cart');
-//         const block = cartButton.closest('.block');
-//         const input = block.querySelector('input[type="number"]');
-//         const quantityCircle = block.querySelector('.block-quantity-invoice');
-//         const quantityText = quantityCircle.querySelector('p');
-//         const availableQuantityElement = block.querySelector('.block-quantity'); // Элемент с текущим количеством на складе
-//         const availableQuantity = parseInt(availableQuantityElement.getAttribute('data-quantity'), 10) || 0;
-
-//         const quantity = parseInt(input.value, 10);
-
-//         if (isNaN(quantity) || quantity <= 0) {
-//             alert('Укажите корректное количество для добавления.');
-//             return;
-//         }
-
-//         const currentQuantity = parseInt(quantityText.textContent, 10) || 0; // Уже добавленное количество
-//         const remainingQuantity = availableQuantity - currentQuantity; // Остаток на складе
-
-//         if (quantity > remainingQuantity) {
-//             alert('Недостаточно товара на складе для добавления в накладную.');
-//             return;
-//         }
-
-//         // Добавляем товар в накладную
-//         quantityText.textContent = currentQuantity + quantity;
-//         quantityCircle.classList.remove('hidden'); // Показать кружочек
-//     }
-// });
-
-
-// // Удаление товара из накладной
-// document.addEventListener('click', function (event) {
-//     if (event.target.closest('.block-actions-invoice-delete')) {
-//         const deleteButton = event.target.closest('.block-actions-invoice-delete');
-//         const block = deleteButton.closest('.block');
-//         const input = block.querySelector('input[type="number"]');
-//         const quantityCircle = block.querySelector('.block-quantity-invoice');
-//         const quantityText = quantityCircle.querySelector('p');
-
-//         let currentQuantity = parseInt(quantityText.textContent, 10) || 0;
-//         const quantityToRemove = parseInt(input.value, 10) || 0;
-
-//         if (currentQuantity > 0) {
-//             if (quantityToRemove > 0 && quantityToRemove <= currentQuantity) {
-//                 currentQuantity -= quantityToRemove;
-//                 quantityText.textContent = currentQuantity;
-
-//                 if (currentQuantity === 0) {
-//                     quantityCircle.classList.add('hidden'); // Скрыть кружочек
-//                 }
-//             } else {
-//                 alert('Невозможно удалить больше, чем есть в накладной.');
-//             }
-//         } else {
-//             alert('Нет товаров в накладной для удаления.');
-//         }
-//     }
-// });
-
 // Показ кружочка с кол-вом товаров в накладной
 document.addEventListener('click', function (event) {
     if (event.target.closest('.block-actions-cart')) {
@@ -290,6 +228,13 @@ document.addEventListener('DOMContentLoaded', () => {
 function loadItems() {
     const loadMoreButton = document.getElementById('load_more');
     const paragraph = document.querySelector('.download-more p');
+    const container = document.querySelector('.main-items');
+
+    if (!container) { 
+        // Если контейнер не найден, выходим из функции
+        console.warn('Контейнер для товаров не найден. Загрузка товаров пропущена.');
+        return;
+    }
 
     fetch('/api/items_html')
         .then(response => response.text())
@@ -308,35 +253,37 @@ function loadItems() {
 
 const form = document.querySelector('.new-item-popup');
 
-form.addEventListener('submit', (event) => {
-    event.preventDefault();
-
-    const formData = new FormData(form);
-    const modal = document.querySelector('.new-item-popup');
-    const overlay = document.querySelector('.overlay');
-
-    fetch('/api/items', {
-        method: 'POST',
-        body: formData,
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert('Ошибка: ' + data.message);
-                console.error('Ошибка при добавлении товара:', data.message);
-            } else {
-                alert('Товар добавлен!');
-
-                // Скрыть модальное окно и оверлей
-                modal.classList.remove('visible');
-                overlay.classList.remove('visible');
-
-                // Перезагрузить список товаров
-                loadItems();
-            }
+if (form) {
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+    
+        const formData = new FormData(form);
+        const modal = document.querySelector('.new-item-popup');
+        const overlay = document.querySelector('.overlay');
+    
+        fetch('/api/items', {
+            method: 'POST',
+            body: formData,
         })
-        .catch(error => console.error('Ошибка при добавлении товара:', error));
-});
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Ошибка: ' + data.message);
+                    console.error('Ошибка при добавлении товара:', data.message);
+                } else {
+                    alert('Товар добавлен!');
+    
+                    // Скрыть модальное окно и оверлей
+                    modal.classList.remove('visible');
+                    overlay.classList.remove('visible');
+    
+                    // Перезагрузить список товаров
+                    loadItems();
+                }
+            })
+            .catch(error => console.error('Ошибка при добавлении товара:', error));
+    });
+}
 
 // Загрузка товаров при старте страницы
 loadItems();
@@ -346,56 +293,146 @@ loadItems();
 
 
 
-// Накладные
-document.querySelector('.make-invoice button').addEventListener('click', function () {
-    const invoiceItems = Array.from(document.querySelectorAll('.block-quantity-invoice')).map(block => {
-        const parent = block.closest('.block');
-        const id = parent.dataset.id;
-        const name = parent.dataset.itemName;
-        const quantity = parseInt(block.querySelector('p').textContent, 10);
+// Накладные добавление
+const makeInvoiceButton = document.querySelector('.make-invoice button');
 
-        if (!quantity || quantity <= 0) { // Игнорируем товары с некорректным количеством
-            return null;
+if (makeInvoiceButton) { // Проверяем, существует ли элемент
+    makeInvoiceButton.addEventListener('click', function () {
+        const invoiceItems = Array.from(document.querySelectorAll('.block-quantity-invoice')).map(block => {
+            const parent = block.closest('.block');
+            const id = parent.dataset.id;
+            const name = parent.dataset.itemName;
+            const quantity = parseInt(block.querySelector('p').textContent, 10);
+
+            if (!quantity || quantity <= 0) { // Игнорируем товары с некорректным количеством
+                return null;
+            }
+
+            return { id, itemName: name, quantity };
+        }).filter(item => item !== null); // Удаляем все `null` элементы из массива
+
+        if (invoiceItems.length === 0) {
+            alert('Накладная пуста.');
+            return;
         }
 
-        return { id, itemName: name, quantity };
-    }).filter(item => item !== null); // Удаляем все `null` элементы из массива
+        console.log('Отправляем данные:', JSON.stringify({ items: invoiceItems }, null, 2));
 
-    if (invoiceItems.length === 0) {
-        alert('Накладная пуста.');
-        return;
-    }
+        fetch('/create-invoice', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ items: invoiceItems })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        console.error('Server logs:', data.logs);
+                        throw new Error(data.message || 'Ошибка сервера');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Server logs:', data.logs);
+                if (data.message) {
+                    alert(data.message);
+                    window.location.href = '/invoices'; // Перенаправляем на страницу с накладными
+                } else {
+                    alert('Произошла ошибка при создании накладной.');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Ошибка сервера. Попробуйте позже.');
+            });
+    });
+}
 
-    console.log('Отправляем данные:', JSON.stringify({ items: invoiceItems }, null, 2));
 
-    fetch('/create-invoice', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ items: invoiceItems })
-    })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(data => {
-                    console.error('Server logs:', data.logs);
-                    throw new Error(data.message || 'Ошибка сервера');
+
+
+// Накладные
+document.addEventListener("DOMContentLoaded", () => {
+    const invoiceContainers = document.querySelectorAll(".block-invoice");
+
+    invoiceContainers.forEach((container) => {
+        const statusElement = container.querySelector(".block-invoice-status");
+        const markPaidButton = container.querySelector(".mark-paid");
+        const markUnpaidButton = container.querySelector(".mark-unpaid");
+        const toggleItemsButton = container.querySelector(".toggle-items");
+        const itemsContainer = container.querySelector(".block-invoice-items");
+        const itemsList = itemsContainer.querySelector(".items-list");
+        const invoiceId = container.id.split("-")[1];
+
+        // Установить статус "Оплачен"
+        markPaidButton.addEventListener("click", async () => {
+            try {
+                const response = await fetch(`/api/invoices/status/${invoiceId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ status: true }),
                 });
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Server logs:', data.logs);
-            if (data.message) {
-                alert(data.message);
-                window.location.href = '/invoices'; // Перенаправляем на страницу с накладными
-            } else {
-                alert('Произошла ошибка при создании накладной.');
-            }
-        })
-        .catch(error => {
-            console.error('Ошибка:', error);
-            alert('Ошибка сервера. Попробуйте позже.');
-        });
-});
 
+                if (response.ok) {
+                    statusElement.textContent = "Оплачен";
+                    statusElement.classList.remove("unpaid");
+                    statusElement.classList.add("paid");
+                } else {
+                    console.error("Ошибка при обновлении статуса: ", await response.text());
+                }
+            } catch (error) {
+                console.error("Ошибка при обновлении статуса: ", error);
+            }
+        });
+
+        // Установить статус "Не оплачен"
+        markUnpaidButton.addEventListener("click", async () => {
+            try {
+                const response = await fetch(`/api/invoices/status/${invoiceId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ status: false }),
+                });
+
+                if (response.ok) {
+                    statusElement.textContent = "Не оплачен";
+                    statusElement.classList.remove("paid");
+                    statusElement.classList.add("unpaid");
+                } else {
+                    console.error("Ошибка при обновлении статуса: ", await response.text());
+                }
+            } catch (error) {
+                console.error("Ошибка при обновлении статуса: ", error);
+            }
+        });
+
+        // Показать/скрыть товары
+        toggleItemsButton.addEventListener("click", async () => {
+            if (!itemsContainer.classList.contains("expanded")) {
+                if (itemsList.childElementCount === 0) {
+                    try {
+                        const response = await fetch(`/get-invoice-items/${invoiceId}`);
+                        if (response.ok) {
+                            const items = await response.json();
+                            itemsList.innerHTML = ""; // Очистка списка
+                            items.forEach((item) => {
+                                const listItem = document.createElement("li");
+                                listItem.textContent = `${item.iteminvoice} — ${item.itemquantity} шт`;
+                                itemsList.appendChild(listItem);
+                            });
+                        } else {
+                            console.error("Ошибка при загрузке товаров: ", await response.text());
+                        }
+                    } catch (error) {
+                        console.error("Ошибка при загрузке товаров: ", error);
+                    }
+                }
+                itemsContainer.classList.add("expanded");
+            } else {
+                itemsContainer.classList.remove("expanded");
+            }
+        });
+    });
+});

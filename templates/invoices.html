@@ -3,117 +3,40 @@
 
 {#основной контент: #}
 {% block main %}
+
 <div class="container">
     <h1 class="main-title">Накладные</h1>
-        <div class="block-invoices">
-            <div id="invoice1" class="block-invoice">
-                <div class="block-invoice-number">Накладная № 1111</div>
-                <div class="block-invoice-status paid">Оплачен</div>
-                <div class="block-invoice-actions">
-                    <div class="block-invoice-actions-waspaid actions-green">
-                        <button title="Установить статус «Оплачен»">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><g data-name="60-Check"><path d="M16 0a16 16 0 1 0 16 16A16 16 0 0 0 16 0zm0 30a14 14 0 1 1 14-14 14 14 0 0 1-14 14z"/><path d="m13 20.59-4.29-4.3-1.42 1.42 5 5a1 1 0 0 0 1.41 0l11-11-1.41-1.41z"/></g></svg>
-                        </button>
-                    </div>
-                    <div class="block-invoice-actions-unpaided actions-red">
-                        <button title="Установить статус «Не оплачен»">
-                            <svg version="1.1" id="icons_1_" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 137 137" style="enable-background:new 0 0 128 128" xml:space="preserve"><g id="row1_1_"><g id="_x34__2_"><path class="st2" d="M64 .3C28.7.3 0 28.8 0 64s28.7 63.7 64 63.7 64-28.5 64-63.7S99.3.3 64 .3zm0 121C32.2 121.3 6.4 95.7 6.4 64 6.4 32.3 32.2 6.7 64 6.7s57.6 25.7 57.6 57.3c0 31.7-25.8 57.3-57.6 57.3zm21.9-73.2L81 43.3c-.9-.9-2.3-.9-3.2 0L64 57 50.2 43.3c-.9-.9-2.3-.9-3.2 0l-4.9 4.8c-.9.9-.9 2.3 0 3.2L55.9 65 42.1 78.8c-.9.9-.9 2.3 0 3.2l4.9 4.8c.9.9 2.3.9 3.2 0L64 73.1l13.8 13.7c.9.9 2.3.9 3.2 0l4.9-4.8c.9-.9.9-2.3 0-3.2L72.1 65l13.8-13.7c.9-.9.9-2.3 0-3.2z" id="error_transparent"/></g></g></svg>
-                        </button>
-                    </div>
-                    <div class="block-invoice-actions-open-order">
-                        <button title="Посмотреть товары">
-                            <svg version="1.1" id="ios7_x5F_arrows_1_" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 132 132" style="enable-background:new 0 0 128 128" xml:space="preserve"><style>.st0{display:none}.st1{display:inline}</style><g id="_x38__1_"><path d="m90.4 33.8-46 46.1V45H39v43.5h43.9v-5.4H48.8l45.4-45.5-3.8-3.8zm18.8-15.1c-24.9-25-65.4-25-90.3 0-24.9 25-24.9 65.5 0 90.5s65.4 25 90.3 0c25-24.9 25-65.5 0-90.5zm-3.7 86.8c-22.9 22.9-59.9 22.9-82.8 0s-22.9-60.1 0-83 59.9-22.9 82.8 0c22.8 22.9 22.8 60.1 0 83z" id="icon_31_"/></g></svg>
-                        </button>
-                    </div>
+    <div class="block-invoices">
+        {% for invoice in invoices %}
+        <div class="block-invoice" id="invoice-{{ invoice.id }}">
+            <div class="block-invoice-number">Накладная № {{ invoice.numberinvoice }}</div>
+            <div class="block-invoice-status {{ 'paid' if invoice.statusinvoice else 'unpaid' }}">
+                {{ 'Оплачен' if invoice.statusinvoice else 'Не оплачен' }}
+            </div>
+            <div class="block-invoice-actions">
+                <div class="block-invoice-actions-waspaid actions-green">
+                    <button data-id="{{ invoice.id }}" data-status="true" class="mark-paid" title="Установить статус «Оплачен»">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><g data-name="60-Check"><path d="M16 0a16 16 0 1 0 16 16A16 16 0 0 0 16 0zm0 30a14 14 0 1 1 14-14 14 14 0 0 1-14 14z"/><path d="m13 20.59-4.29-4.3-1.42 1.42 5 5a1 1 0 0 0 1.41 0l11-11-1.41-1.41z"/></g></svg>
+                    </button>
+                </div>
+                <div class="block-invoice-actions-unpaided actions-red">
+                    <button data-id="{{ invoice.id }}" data-status="false" class="mark-unpaid" title="Установить статус «Не оплачен»">
+                        <svg version="1.1" id="icons_1_" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 137 137" style="enable-background:new 0 0 128 128" xml:space="preserve"><g id="row1_1_"><g id="_x34__2_"><path class="st2" d="M64 .3C28.7.3 0 28.8 0 64s28.7 63.7 64 63.7 64-28.5 64-63.7S99.3.3 64 .3zm0 121C32.2 121.3 6.4 95.7 6.4 64 6.4 32.3 32.2 6.7 64 6.7s57.6 25.7 57.6 57.3c0 31.7-25.8 57.3-57.6 57.3zm21.9-73.2L81 43.3c-.9-.9-2.3-.9-3.2 0L64 57 50.2 43.3c-.9-.9-2.3-.9-3.2 0l-4.9 4.8c-.9.9-.9 2.3 0 3.2L55.9 65 42.1 78.8c-.9.9-.9 2.3 0 3.2l4.9 4.8c.9.9 2.3.9 3.2 0L64 73.1l13.8 13.7c.9.9 2.3.9 3.2 0l4.9-4.8c.9-.9.9-2.3 0-3.2L72.1 65l13.8-13.7c.9-.9.9-2.3 0-3.2z" id="error_transparent"/></g></g></svg>
+                    </button>
+                </div>
+                <div class="block-invoice-actions-open-order">
+                    <button data-id="{{ invoice.id }}" class="toggle-items" title="Посмотреть товары">
+                        <svg version="1.1" id="ios7_x5F_arrows_1_" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 132 132" style="enable-background:new 0 0 128 128" xml:space="preserve"><style>.st0{display:none}.st1{display:inline}</style><g id="_x38__1_"><path d="m90.4 33.8-46 46.1V45H39v43.5h43.9v-5.4H48.8l45.4-45.5-3.8-3.8zm18.8-15.1c-24.9-25-65.4-25-90.3 0-24.9 25-24.9 65.5 0 90.5s65.4 25 90.3 0c25-24.9 25-65.5 0-90.5zm-3.7 86.8c-22.9 22.9-59.9 22.9-82.8 0s-22.9-60.1 0-83 59.9-22.9 82.8 0c22.8 22.9 22.8 60.1 0 83z" id="icon_31_"/></g></svg>
+                    </button>
                 </div>
             </div>
-            <div class="block-invoice">
-                <div class="block-invoice-number">Накладная № 1222</div>
-                <div class="block-invoice-status unpaid">Не оплачен</div>
-                <div class="block-invoice-actions">
-                    <div class="block-invoice-actions-waspaid actions-green">
-                        <button title="Установить статус «Оплачен»">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><g data-name="60-Check"><path d="M16 0a16 16 0 1 0 16 16A16 16 0 0 0 16 0zm0 30a14 14 0 1 1 14-14 14 14 0 0 1-14 14z"/><path d="m13 20.59-4.29-4.3-1.42 1.42 5 5a1 1 0 0 0 1.41 0l11-11-1.41-1.41z"/></g></svg>
-                        </button>
-                    </div>
-                    <div class="block-invoice-actions-unpaided actions-red">
-                        <button title="Установить статус «Не оплачен»">
-                            <svg version="1.1" id="icons_1_" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 137 137" style="enable-background:new 0 0 128 128" xml:space="preserve"><g id="row1_1_"><g id="_x34__2_"><path class="st2" d="M64 .3C28.7.3 0 28.8 0 64s28.7 63.7 64 63.7 64-28.5 64-63.7S99.3.3 64 .3zm0 121C32.2 121.3 6.4 95.7 6.4 64 6.4 32.3 32.2 6.7 64 6.7s57.6 25.7 57.6 57.3c0 31.7-25.8 57.3-57.6 57.3zm21.9-73.2L81 43.3c-.9-.9-2.3-.9-3.2 0L64 57 50.2 43.3c-.9-.9-2.3-.9-3.2 0l-4.9 4.8c-.9.9-.9 2.3 0 3.2L55.9 65 42.1 78.8c-.9.9-.9 2.3 0 3.2l4.9 4.8c.9.9 2.3.9 3.2 0L64 73.1l13.8 13.7c.9.9 2.3.9 3.2 0l4.9-4.8c.9-.9.9-2.3 0-3.2L72.1 65l13.8-13.7c.9-.9.9-2.3 0-3.2z" id="error_transparent"/></g></g></svg>
-                        </button>
-                    </div>
-                    <div class="block-invoice-actions-open-order">
-                        <button title="Посмотреть товары">
-                            <svg version="1.1" id="ios7_x5F_arrows_1_" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 132 132" style="enable-background:new 0 0 128 128" xml:space="preserve"><style>.st0{display:none}.st1{display:inline}</style><g id="_x38__1_"><path d="m90.4 33.8-46 46.1V45H39v43.5h43.9v-5.4H48.8l45.4-45.5-3.8-3.8zm18.8-15.1c-24.9-25-65.4-25-90.3 0-24.9 25-24.9 65.5 0 90.5s65.4 25 90.3 0c25-24.9 25-65.5 0-90.5zm-3.7 86.8c-22.9 22.9-59.9 22.9-82.8 0s-22.9-60.1 0-83 59.9-22.9 82.8 0c22.8 22.9 22.8 60.1 0 83z" id="icon_31_"/></g></svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div id="invoice2" class="block-invoice">
-                <div class="block-invoice-number">Накладная № 1222</div>
-                <div class="block-invoice-status unpaid">Не оплачен</div>
-                <div class="block-invoice-actions">
-                    <div class="block-invoice-actions-waspaid actions-green">
-                        <button title="Установить статус «Оплачен»">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><g data-name="60-Check"><path d="M16 0a16 16 0 1 0 16 16A16 16 0 0 0 16 0zm0 30a14 14 0 1 1 14-14 14 14 0 0 1-14 14z"/><path d="m13 20.59-4.29-4.3-1.42 1.42 5 5a1 1 0 0 0 1.41 0l11-11-1.41-1.41z"/></g></svg>
-                        </button>
-                    </div>
-                    <div class="block-invoice-actions-unpaided actions-red">
-                        <button title="Установить статус «Не оплачен»">
-                            <svg version="1.1" id="icons_1_" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 137 137" style="enable-background:new 0 0 128 128" xml:space="preserve"><g id="row1_1_"><g id="_x34__2_"><path class="st2" d="M64 .3C28.7.3 0 28.8 0 64s28.7 63.7 64 63.7 64-28.5 64-63.7S99.3.3 64 .3zm0 121C32.2 121.3 6.4 95.7 6.4 64 6.4 32.3 32.2 6.7 64 6.7s57.6 25.7 57.6 57.3c0 31.7-25.8 57.3-57.6 57.3zm21.9-73.2L81 43.3c-.9-.9-2.3-.9-3.2 0L64 57 50.2 43.3c-.9-.9-2.3-.9-3.2 0l-4.9 4.8c-.9.9-.9 2.3 0 3.2L55.9 65 42.1 78.8c-.9.9-.9 2.3 0 3.2l4.9 4.8c.9.9 2.3.9 3.2 0L64 73.1l13.8 13.7c.9.9 2.3.9 3.2 0l4.9-4.8c.9-.9.9-2.3 0-3.2L72.1 65l13.8-13.7c.9-.9.9-2.3 0-3.2z" id="error_transparent"/></g></g></svg>
-                        </button>
-                    </div>
-                    <div class="block-invoice-actions-open-order">
-                        <button title="Посмотреть товары">
-                            <svg version="1.1" id="ios7_x5F_arrows_1_" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 132 132" style="enable-background:new 0 0 128 128" xml:space="preserve"><style>.st0{display:none}.st1{display:inline}</style><g id="_x38__1_"><path d="m90.4 33.8-46 46.1V45H39v43.5h43.9v-5.4H48.8l45.4-45.5-3.8-3.8zm18.8-15.1c-24.9-25-65.4-25-90.3 0-24.9 25-24.9 65.5 0 90.5s65.4 25 90.3 0c25-24.9 25-65.5 0-90.5zm-3.7 86.8c-22.9 22.9-59.9 22.9-82.8 0s-22.9-60.1 0-83 59.9-22.9 82.8 0c22.8 22.9 22.8 60.1 0 83z" id="icon_31_"/></g></svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="block-invoice">
-                <div class="block-invoice-number">Накладная № 1111</div>
-                <div class="block-invoice-status paid">Оплачен</div>
-                <div class="block-invoice-actions">
-                    <div class="block-invoice-actions-waspaid actions-green">
-                        <button title="Установить статус «Оплачен»">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><g data-name="60-Check"><path d="M16 0a16 16 0 1 0 16 16A16 16 0 0 0 16 0zm0 30a14 14 0 1 1 14-14 14 14 0 0 1-14 14z"/><path d="m13 20.59-4.29-4.3-1.42 1.42 5 5a1 1 0 0 0 1.41 0l11-11-1.41-1.41z"/></g></svg>
-                        </button>
-                    </div>
-                    <div class="block-invoice-actions-unpaided actions-red">
-                        <button title="Установить статус «Не оплачен»">
-                            <svg version="1.1" id="icons_1_" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 137 137" style="enable-background:new 0 0 128 128" xml:space="preserve"><g id="row1_1_"><g id="_x34__2_"><path class="st2" d="M64 .3C28.7.3 0 28.8 0 64s28.7 63.7 64 63.7 64-28.5 64-63.7S99.3.3 64 .3zm0 121C32.2 121.3 6.4 95.7 6.4 64 6.4 32.3 32.2 6.7 64 6.7s57.6 25.7 57.6 57.3c0 31.7-25.8 57.3-57.6 57.3zm21.9-73.2L81 43.3c-.9-.9-2.3-.9-3.2 0L64 57 50.2 43.3c-.9-.9-2.3-.9-3.2 0l-4.9 4.8c-.9.9-.9 2.3 0 3.2L55.9 65 42.1 78.8c-.9.9-.9 2.3 0 3.2l4.9 4.8c.9.9 2.3.9 3.2 0L64 73.1l13.8 13.7c.9.9 2.3.9 3.2 0l4.9-4.8c.9-.9.9-2.3 0-3.2L72.1 65l13.8-13.7c.9-.9.9-2.3 0-3.2z" id="error_transparent"/></g></g></svg>
-                        </button>
-                    </div>
-                    <div class="block-invoice-actions-open-order">
-                        <button title="Посмотреть товары">
-                            <svg version="1.1" id="ios7_x5F_arrows_1_" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 132 132" style="enable-background:new 0 0 128 128" xml:space="preserve"><style>.st0{display:none}.st1{display:inline}</style><g id="_x38__1_"><path d="m90.4 33.8-46 46.1V45H39v43.5h43.9v-5.4H48.8l45.4-45.5-3.8-3.8zm18.8-15.1c-24.9-25-65.4-25-90.3 0-24.9 25-24.9 65.5 0 90.5s65.4 25 90.3 0c25-24.9 25-65.5 0-90.5zm-3.7 86.8c-22.9 22.9-59.9 22.9-82.8 0s-22.9-60.1 0-83 59.9-22.9 82.8 0c22.8 22.9 22.8 60.1 0 83z" id="icon_31_"/></g></svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="block-invoice">
-                <div class="block-invoice-number">Накладная № 1111</div>
-                <div class="block-invoice-status paid">Оплачен</div>
-                <div class="block-invoice-actions">
-                    <div class="block-invoice-actions-waspaid actions-green">
-                        <button title="Установить статус «Оплачен»">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><g data-name="60-Check"><path d="M16 0a16 16 0 1 0 16 16A16 16 0 0 0 16 0zm0 30a14 14 0 1 1 14-14 14 14 0 0 1-14 14z"/><path d="m13 20.59-4.29-4.3-1.42 1.42 5 5a1 1 0 0 0 1.41 0l11-11-1.41-1.41z"/></g></svg>
-                        </button>
-                    </div>
-                    <div class="block-invoice-actions-unpaided actions-red">
-                        <button title="Установить статус «Не оплачен»">
-                            <svg version="1.1" id="icons_1_" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 137 137" style="enable-background:new 0 0 128 128" xml:space="preserve"><g id="row1_1_"><g id="_x34__2_"><path class="st2" d="M64 .3C28.7.3 0 28.8 0 64s28.7 63.7 64 63.7 64-28.5 64-63.7S99.3.3 64 .3zm0 121C32.2 121.3 6.4 95.7 6.4 64 6.4 32.3 32.2 6.7 64 6.7s57.6 25.7 57.6 57.3c0 31.7-25.8 57.3-57.6 57.3zm21.9-73.2L81 43.3c-.9-.9-2.3-.9-3.2 0L64 57 50.2 43.3c-.9-.9-2.3-.9-3.2 0l-4.9 4.8c-.9.9-.9 2.3 0 3.2L55.9 65 42.1 78.8c-.9.9-.9 2.3 0 3.2l4.9 4.8c.9.9 2.3.9 3.2 0L64 73.1l13.8 13.7c.9.9 2.3.9 3.2 0l4.9-4.8c.9-.9.9-2.3 0-3.2L72.1 65l13.8-13.7c.9-.9.9-2.3 0-3.2z" id="error_transparent"/></g></g></svg>
-                        </button>
-                    </div>
-                    <div class="block-invoice-actions-open-order">
-                        <button title="Посмотреть товары">
-                            <svg version="1.1" id="ios7_x5F_arrows_1_" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 132 132" style="enable-background:new 0 0 128 128" xml:space="preserve"><style>.st0{display:none}.st1{display:inline}</style><g id="_x38__1_"><path d="m90.4 33.8-46 46.1V45H39v43.5h43.9v-5.4H48.8l45.4-45.5-3.8-3.8zm18.8-15.1c-24.9-25-65.4-25-90.3 0-24.9 25-24.9 65.5 0 90.5s65.4 25 90.3 0c25-24.9 25-65.5 0-90.5zm-3.7 86.8c-22.9 22.9-59.9 22.9-82.8 0s-22.9-60.1 0-83 59.9-22.9 82.8 0c22.8 22.9 22.8 60.1 0 83z" id="icon_31_"/></g></svg>
-                        </button>
-                    </div>
-                </div>
+            <div class="block-invoice-items" id="items-{{ invoice.id }}">
+                <ul class="items-list"></ul>
             </div>
         </div>
-        <div class="download-more">
-            <button title="Загрузить ещё">
+        {% endfor %}
+        <div class="download-more" style="display: none;">
+            <button title="Загрузить ещё" id="load_more" class="load_more">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.924 13.617A1 1 0 0 0 19 13h-3V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v10H5a1 1 0 0 0-.707 1.707l7 7a1 1 0 0 0 1.414 0l7-7a1 1 0 0 0 .217-1.09zM12 19.586 7.414 15H9a1 1 0 0 0 1-1V4h4v10a1 1 0 0 0 1 1h1.586z" style="fill:#1c1b1e" data-name="Down"/></svg>
             </button>
             <p>Загрузить ещё</p>

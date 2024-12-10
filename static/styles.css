@@ -103,36 +103,6 @@ body {
     z-index: 2;
 }
 
-/* .header-search {
-    display: flex;
-    position: relative;
-}
-
-.header-search-input {
-    background: #F8F9FC;
-    border-radius: 5px 0 0 5px;
-    font-size: 14px;
-    line-height: 19px;
-    color: #000000;
-    border: 0;
-    padding: 7px 10px;
-    outline: none;
-}
-
-.header-search-input::placeholder {
-    color: #B3B3B3;
-}
-
-.header-search-button {
-    background: #dfa54e;
-    border-radius: 0 5px 5px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 0;
-    width: 33px;
-    cursor: pointer;
-} */
 
 .header-info {
     display: flex;
@@ -143,6 +113,17 @@ body {
     align-items: center;
     padding-right: 3px;
     border-right: 1px solid #b3b3b3;
+    
+}
+
+.header-info-actions .svg-notif:hover path {
+    fill: #ffbb01;
+    cursor: pointer;
+}
+
+.header-info-actions .svg-mail:hover path {
+    fill: #0195ff;
+    cursor: pointer;
 }
 
 .header-info-actions svg {
@@ -466,44 +447,6 @@ body {
 }
 
 
-/* .make-invoice {
-    display: none;
-    border-radius: 30px;
-    background: rgb(1, 157, 1);
-    width: 310px;
-    height: 70px;
-    position: fixed;
-    bottom: 45px;
-    right: calc(50% - 280px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-} */
-
-/* .make-invoice button {
-    width: 310px;
-    height: 70px;
-    background: rgb(1, 157, 1);
-    border-radius: 30px;
-    border: 0;
-    color: #fafafa;
-    font-size: 19px;
-    cursor: pointer;
-    position: fixed;
-    bottom: 45px;
-    /* right: calc(50% - 280px); */
-    /* left: 300px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    display: none;
-}
- */
-
-/* .make-invoice button:hover {
-    background: rgb(1, 184, 1); 
-} */
-
 .make-invoice button {
     width: 270px;
     height: 60px;
@@ -618,15 +561,6 @@ button.cross-popup {
 
 
 
-
-/* 
-.body-login {
-    height: 100vh;
-}
-
-.body-login main {
-    height: 100vh;
-} */
 
 .main-login {
     background: rgb(185,110,27);
@@ -777,34 +711,6 @@ input.error::placeholder {
 }
 
 
-/* .block-login {
-    box-shadow: 4px 4px 49px 0px rgba(34, 60, 80, 0.2);
-    background-color:#fafafa;
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    row-gap: 20px;
-    border-radius: 20px;
-}
-
-.block-login-head {
-    padding: 10px;
-    text-align: left;
-    background: rgb(231,175,112);
-    background: linear-gradient(90deg, rgba(231,175,112,1) 57%, rgba(255,175,0,1) 100%);
-    font-size: 20px;
-}
-
-.block-login-log input {
-    width: 200px;
-    height: 30px;
-}
-
-.block-login-passw input {
-    width: 200px;
-    height: 30px;
-} */
-
 
 .block-invoices {
     display: flex;
@@ -818,6 +724,7 @@ input.error::placeholder {
     background-color: #fcfcfc;
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
     padding: 20px;
     border: 2px solid #cfcfcf;
     border-radius: 10px;
@@ -891,4 +798,27 @@ input.error::placeholder {
 
 .block-invoice-actions-open-order button:hover svg {
     fill: rgb(60, 60, 60);
+}
+
+.block-invoice-items {
+    flex-basis: 100%;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease;
+}
+
+.block-invoice-items.expanded {
+    max-height: 300px;
+    display: block;
+}
+
+.items-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.items-list li {
+    padding: 5px 10px;
+    border-bottom: 1px solid #ddd;
 }
