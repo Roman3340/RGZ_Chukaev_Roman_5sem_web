@@ -346,4 +346,56 @@ loadItems();
 
 
 
+// Накладные
+document.querySelector('.make-invoice button').addEventListener('click', function () {
+    const invoiceItems = Array.from(document.querySelectorAll('.block-quantity-invoice')).map(block => {
+        const parent = block.closest('.block');
+        const id = parent.dataset.id;
+        const name = parent.dataset.itemName;
+        const quantity = parseInt(block.querySelector('p').textContent, 10);
+
+        if (!quantity || quantity <= 0) { // Игнорируем товары с некорректным количеством
+            return null;
+        }
+
+        return { id, itemName: name, quantity };
+    }).filter(item => item !== null); // Удаляем все `null` элементы из массива
+
+    if (invoiceItems.length === 0) {
+        alert('Накладная пуста.');
+        return;
+    }
+
+    console.log('Отправляем данные:', JSON.stringify({ items: invoiceItems }, null, 2));
+
+    fetch('/create-invoice', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ items: invoiceItems })
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    console.error('Server logs:', data.logs);
+                    throw new Error(data.message || 'Ошибка сервера');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Server logs:', data.logs);
+            if (data.message) {
+                alert(data.message);
+                window.location.href = '/invoices'; // Перенаправляем на страницу с накладными
+            } else {
+                alert('Произошла ошибка при создании накладной.');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Ошибка сервера. Попробуйте позже.');
+        });
+});
 

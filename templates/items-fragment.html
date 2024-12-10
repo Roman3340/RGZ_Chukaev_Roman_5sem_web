@@ -1,5 +1,5 @@
 {% for item in items %}
-<div class="block {% if loop.index > 24 %}hidden-block{% endif %}" data-id="{{ item.id }}">
+<div class="block {% if loop.index > 24 %}hidden-block{% endif %}" data-id="{{ item.id }}" data-item-name="{{ item.nameitem }}">
     <div class="block-image {% if item.imageitem in ['kuh_plita', 'britva', 'wafelnica'] %}block-image-kuh{% endif %}">
         <img src="../static/images/{{ item.imageitem }}.png" alt="{{ item.nameitem }}">
     </div>

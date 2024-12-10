@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 import sqlite3
 import os
 from os import path
+import random
 app = Flask(__name__)
 
 
@@ -330,6 +331,93 @@ def add_item():
 def invoices_page():
     login = session.get('login')
     return render_template('invoices.html', login=login)
+
+
+# Роут для создания накладной
+@app.route('/create-invoice', methods=['POST'])
+def create_invoice():
+    logs = []  # Логи для отправки в ответе
+    data = request.get_json()
+    logs.append(f"Received request data: {data}")
+
+    # Проверяем данные
+    items = data.get('items', [])
+    if not items:
+        logs.append("Нет товаров для создания накладной.")
+        return jsonify({'message': 'Нет товаров для создания накладной', 'logs': logs}), 400
+
+    conn, cur = None, None
+    try:
+        # Подключение к базе данных
+        conn, cur = db_connect()
+        db_type = current_app.config.get('DB_TYPE', 'sqlite')
+        logs.append(f"Connected to database. DB_TYPE: {db_type}")
+
+        # Генерация случайного номера накладной
+        number_invoice = random.randint(10000, 99999)
+        logs.append(f"Generated numberInvoice: {number_invoice}")
+
+        # Добавляем накладную в базу данных
+        if db_type == 'postgres':
+            query_invoice = 'INSERT INTO invoices (numberInvoice, statusInvoice) VALUES (%s, %s) RETURNING id'
+            logs.append(f"Executing query: {query_invoice} with values: {number_invoice}, {False}")
+            cur.execute(query_invoice, (number_invoice, False))
+            result = cur.fetchone()
+            if result is None:
+                raise Exception("No data returned from INSERT INTO invoices")
+            invoice_id = result['id']
+        else:
+            query_invoice = 'INSERT INTO invoices (numberinvoice, statusinvoice) VALUES (?, ?)'
+            logs.append(f"Executing query: {query_invoice} with values: {number_invoice}, {0}")
+            cur.execute(query_invoice, (number_invoice, 0))
+            invoice_id = cur.lastrowid
+
+        logs.append(f"Created invoice with ID: {invoice_id}")
+
+        # Добавляем товары в накладную
+        for item in items:
+            item_name = item.get('itemName')
+            quantity = item.get('quantity')
+
+            if not item_name or quantity <= 0:
+                logs.append(f"Skipping invalid item: {item}")
+                continue
+
+            if db_type == 'postgres':
+                query_item = 'INSERT INTO invoiceItems (idInvoice, itemInvoice, itemQuantity) VALUES (%s, %s, %s)'
+                logs.append(f"Executing query: {query_item} with values: {invoice_id}, {item_name}, {quantity}")
+                cur.execute(query_item, (invoice_id, item_name, quantity))
+            else:
+                query_item = 'INSERT INTO invoiceitems (idinvoice, iteminvoice, itemquantity) VALUES (?, ?, ?)'
+                logs.append(f"Executing query: {query_item} with values: {invoice_id}, {item_name}, {quantity}")
+                cur.execute(query_item, (invoice_id, item_name, quantity))
+
+            logs.append(f"Added item to invoice: {item_name}, quantity: {quantity}")
+
+        # Фиксируем транзакцию
+        conn.commit()
+        logs.append("Transaction committed successfully.")
+        return jsonify({
+            'message': 'Накладная успешно создана',
+            'idInvoice': invoice_id,
+            'numberInvoice': number_invoice,
+            'logs': logs
+        }), 201
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        logs.append(f"Transaction rolled back due to error: {e}")
+        return jsonify({'message': 'Ошибка сервера', 'error': str(e), 'logs': logs}), 500
+
+    finally:
+        # Закрываем соединение с базой данных
+        if conn and cur:
+            db_close(conn, cur)
+            logs.append("Database connection closed.")
+
+
+
 
 
 @app.errorhandler(400)
