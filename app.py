@@ -388,14 +388,12 @@ def create_invoice():
 def update_invoice_status(invoice_id):
     conn, cur = db_connect()
     try:
-        # Получение нового статуса из запроса
         data = request.get_json()
         if not data or 'status' not in data:
             return jsonify({"error": "Invalid request"}), 400
 
         new_status = data['status']
 
-        # Обновление статуса накладной
         if current_app.config['DB_TYPE'] == 'postgres':
             query = "UPDATE invoices SET statusInvoice = %s WHERE id = %s RETURNING *"
             cur.execute(query, (new_status, invoice_id))
@@ -408,7 +406,6 @@ def update_invoice_status(invoice_id):
         if not updated_invoice:
             return jsonify({"error": "Invoice not found"}), 404
 
-        # Преобразование результата в JSON-совместимый формат
         invoice = dict(updated_invoice) if isinstance(updated_invoice, sqlite3.Row) else updated_invoice
 
         return jsonify({
@@ -421,14 +418,17 @@ def update_invoice_status(invoice_id):
         db_close(conn, cur)
 
 
+
 @app.route('/get-invoice-items/<int:invoice_id>', methods=['GET'])
 def get_invoice_items(invoice_id):
     conn, cur = db_connect()
     try:
-        query = "SELECT * FROM invoiceItems WHERE idinvoice = %s" if current_app.config['DB_TYPE'] == 'postgres' else "SELECT * FROM invoiceitems WHERE idinvoice = ?"
+        query = "SELECT * FROM invoiceItems WHERE idinvoice = ?" if current_app.config['DB_TYPE'] == 'sqlite' else "SELECT * FROM invoiceItems WHERE idinvoice = %s"
         cur.execute(query, (invoice_id,))
-        items = cur.fetchall()  # PostgreSQL возвращает dict напрямую, SQLite возвращает sqlite3.Row
-        return jsonify(items), 200  # Возвращаем как есть
+        items = cur.fetchall()
+        items_list = [dict(item) for item in items]  # Преобразование в список словарей
+
+        return jsonify(items_list), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
